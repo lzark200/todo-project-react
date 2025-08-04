@@ -1,12 +1,18 @@
 const express = require('express')
 const app = express() ; 
-const {createTodo , updateTodo} = require('./types')
+const {createTodo , updateTodo} = require('./types');
+const { mongoConnect } = require('./mongodb_connection/connection');
+const { todo } = require('./models/db');
+
+
 const port = 8001 ;
 
 // json-body parsing middleware : 
 app.use(express.json()) ; 
 
-app.post('/todo' , (req ,res)=>{
+mongoConnect() ; 
+
+app.post('/todo' , async (req ,res)=>{
     // add todo
 
     const todos = req.body.todos ; 
@@ -20,19 +26,27 @@ app.post('/todo' , (req ,res)=>{
         })
     }
     else{
+        // put todo in the db : 
+       const createdResponse =  await todo.create({
+            title : todos.title , 
+            description : todos.description 
+        })
+
+        console.log(createdResponse)
         
         res.status(200).json({
-            response , 
+            userInputTodo : response , 
+            databaseResponse : createdResponse,
         })
     }
 
 })
 
 
-app.get('/get-todo' , (req , res)=>{
+app.get('/get-todo' , async (req , res)=>{
     const id = req.body.todoId ;
-    console.log(id) ; 
     const response = updateTodo.safeParse(id);
+    console.log(response) ; 
     if(!response.success){
             res.status(411).json({
             errorMessage : response.error , 
@@ -40,8 +54,12 @@ app.get('/get-todo' , (req , res)=>{
         })
     }
     else{
+        const id = response.data.id ; 
+        const getResponse =  await todo.findById(id)
+        console.log(getResponse) ; 
         res.status(200).json({
-            response , 
+            userResponse : response , 
+            databaseResponse : getResponse,
         })
     }
 })

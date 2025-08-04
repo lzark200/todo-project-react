@@ -1,4 +1,5 @@
-// zod inputs : 
+// zod inputVaildation : 
+
 const zod = require("zod")  ;
 
 const createTodo = zod.object({

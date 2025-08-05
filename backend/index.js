@@ -29,7 +29,8 @@ app.post('/todo' , async (req ,res)=>{
         // put todo in the db : 
        const createdResponse =  await todo.create({
             title : todos.title , 
-            description : todos.description 
+            description : todos.description , 
+            completed : false
         })
 
         console.log(createdResponse)
@@ -56,16 +57,52 @@ app.get('/get-todo' , async (req , res)=>{
     else{
         const id = response.data.id ; 
         const getResponse =  await todo.findById(id)
-        console.log(getResponse) ; 
-        res.status(200).json({
+
+        if(!getResponse){
+           return res.status(400).json({
+                msg : "user not found"
+            })
+        }
+        
+        return res.status(200).json({
             userResponse : response , 
             databaseResponse : getResponse,
         })
     }
 })
 
-app.put("/completed" , (req , res)=>{
-    
+app.put("/completed" , async (req , res)=>{
+    const id = req.body.todoId ; 
+    const response = updateTodo.safeParse(id) ; 
+    if(!response.success){
+        res.status(411).json({
+            errorMessage : response.error ,
+            clarification : "Your sent the wrong inputs"
+        })
+    }
+    else{
+        const user_id = response.data.id ; 
+        const findUserResponse = await todo.findById(user_id)
+        if(!findUserResponse){
+           return res.status(400).json({
+                msg : "user not found"
+            })
+        }
+        else{
+            
+            await todo.updateOne({
+                _id : user_id 
+            } , {
+                completed : true
+            })
+
+            res.status(200).json({
+                status:"success" , 
+                msg : "todo successfully marked completed."
+
+            })
+        }
+    }
 })
 
 

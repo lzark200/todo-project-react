@@ -3,13 +3,14 @@ const app = express() ;
 const {createTodo , updateTodo} = require('./types');
 const { mongoConnect } = require('./mongodb_connection/connection');
 const { todo } = require('./models/db');
+const  cors = require('cors') ; 
 
 
 const port = 8001 ;
 
 // json-body parsing middleware : 
 app.use(express.json()) ; 
-
+app.use(cors()) ; 
 mongoConnect() ; 
 
 app.post('/todo' , async (req ,res)=>{
@@ -45,30 +46,28 @@ app.post('/todo' , async (req ,res)=>{
 
 
 app.get('/get-todo' , async (req , res)=>{
-    const id = req.body.todoId ;
-    const response = updateTodo.safeParse(id);
-    console.log(response) ; 
-    if(!response.success){
-            res.status(411).json({
-            errorMessage : response.error , 
-            clarification : "You sent the wrong inputs."
-        })
-    }
-    else{
-        const id = response.data.id ; 
-        const getResponse =  await todo.findById(id)
+    // const id = req.body.todoId ;
+    // const response = updateTodo.safeParse(id);
+    // console.log(response) ; 
+    // if(!response.success){
+    //         res.status(411).json({
+    //         errorMessage : response.error , 
+    //         clarification : "You sent the wrong inputs."
+    //     })
+    // }
+    // else{
+        const getResponse =  await todo.find({})
 
         if(!getResponse){
            return res.status(400).json({
-                msg : "user not found"
+                msg : "no todo found"
             })
         }
         
         return res.status(200).json({
-            userResponse : response , 
-            databaseResponse : getResponse,
+            todos :  getResponse
         })
-    }
+    // }
 })
 
 app.put("/completed" , async (req , res)=>{

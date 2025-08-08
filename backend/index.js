@@ -10,13 +10,16 @@ const port = 8001 ;
 
 // json-body parsing middleware : 
 app.use(express.json()) ; 
+app.use(express.urlencoded({ extended: true }));
+
 app.use(cors()) ; 
 mongoConnect() ; 
 
 app.post('/todo' , async (req ,res)=>{
     // add todo
 
-    const todos = req.body.todos ; 
+    const todos = req.body.todos
+    console.log(todos) ; 
 
     // input validation using the createTodo schemma
     const response = createTodo.safeParse(todos)  ; 
